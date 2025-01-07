@@ -15,7 +15,7 @@
 # TODO: Make this work with other databases of citations, 
 # TODO: Merge this with the existing TSV parsing solution
 
-
+import re
 from pybtex.database.input import bibtex
 import pybtex.database.input.bibtex 
 from time import strptime
@@ -99,8 +99,15 @@ for pubsource in publist:
             citation = ""
 
             #citation authors - todo - add highlighting for primary author?
+            j=0
             for author in bibdata.entries[bib_id].persons["author"]:
-                citation = citation+" "+author.first_names[0]+" "+author.last_names[0]+", "
+                citation = citation+" "+author.first_names[0]+" "+re.sub(r'[{}]', '', author.last_names[0])+", "
+                if j==0:
+                    if 'Ziyao'in author.first_names[0] or 'Ziyao' in author.last_names[0]:
+                        firstauthor=True
+                    else:
+                        firstauthor=False
+                    j=1
 
             #citation title
             citation = citation + "\"" + html_escape(b["title"].replace("{", "").replace("}","").replace("\\","")) + ".\""
@@ -116,9 +123,12 @@ for pubsource in publist:
             md = "---\ntitle: \""   + html_escape(b["title"].replace("{", "").replace("}","").replace("\\","")) + '"\n'
             
             md += """collection: """ +  publist[pubsource]["collection"]["name"]
-            md += "\ncategory: manuscripts"
+            if firstauthor:
+                md += "\ncategory: firstauthor"
+            else:
+                md += "\ncategory: coauthor"
             md += """\npermalink: """ + publist[pubsource]["collection"]["permalink"]  + html_filename
-            
+            # md +="\nfirstauthor:"+firstauthor+'\n'
             note = False
             if "note" in b.keys():
                 if len(str(b["note"])) > 5:
@@ -130,10 +140,15 @@ for pubsource in publist:
             md += "\nvenue: '" + html_escape(venue) + "'"
             
             url = False
+            adsurl = False
             if "url" in b.keys():
                 if len(str(b["url"])) > 5:
                     md += "\npaperurl: '" + b["url"] + "'"
                     url = True
+            elif "adsurl" in b.keys():
+                if len(str(b["adsurl"])) > 5:
+                    md += "\npaperurl: '" + b["adsurl"] + "'"
+                    adsurl = True
 
             md += "\ncitation: '" + html_escape(citation) + "'"
 
@@ -146,6 +161,9 @@ for pubsource in publist:
 
             if url:
                 md += "\n[Access paper here](" + b["url"] + "){:target=\"_blank\"}\n" 
+            elif adsurl:
+            
+                md += "\n[Access paper here](" + b["adsurl"] + "){:target=\"_blank\"}\n" 
             else:
                 md += "\nUse [Google Scholar](https://scholar.google.com/scholar?q="+html.escape(clean_title.replace("-","+"))+"){:target=\"_blank\"} for full citation"
 
