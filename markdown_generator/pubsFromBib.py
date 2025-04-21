@@ -35,7 +35,7 @@ publist = {
         
     # },
     "journal":{
-        "file": "pubs.bib",
+        "file": "/Users/huzy/Documents/GitHub/huuziyao.github.io/markdown_generator/pubs.bib",
         "venuekey" : "journal",
         "venue-pretext" : "",
         "collection" : {"name":"publications",
@@ -169,7 +169,7 @@ for pubsource in publist:
 
             md_filename = os.path.basename(md_filename)
 
-            with open("../_publications/" + md_filename, 'w', encoding="utf-8") as f:
+            with open("_publications/" + md_filename, 'w', encoding="utf-8") as f:
                 f.write(md)
             print(f'SUCESSFULLY PARSED {bib_id}: \"', b["title"][:60],"..."*(len(b['title'])>60),"\"")
         # field may not exist for a reference
